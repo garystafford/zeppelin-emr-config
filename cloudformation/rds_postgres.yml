@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'This template deploys a single RDS PostgreSQL master database.'
+Parameters:
+  DBInstanceIdentifier:
+    Type: String
+    Default: 'zeppelin-demo'
+  DBEngine:
+    Type: String
+    Default: 'postgres'
+  DBEngineVersion:
+    Type: String
+    Default: '11.5'
+  DBSourceRegion:
+    Type: String
+    Default: 'us-east-1'
+  DBInstanceClass:
+    Type: String
+    Default: 'db.m4.large'
+  DBStorageType:
+    Type: String
+    Default: 'gp2'
+  DBAllocatedStorage:
+    Type: Number
+    Default: 20
+  DBName:
+    Type: String
+    Default: 'ratings'
+    Description: 'Movie Ratings database name'
+  DBUser:
+    Type: String
+    Description: 'Master Username for database'
+  DBPassword:
+    Type: String
+    Description: 'Master Password for database'
+    NoEcho: True
+Resources:
+  ZeppelinDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      PubliclyAccessible: False
+      DBInstanceIdentifier:
+        Ref: DBInstanceIdentifier
+      DBName:
+        Ref: DBName
+      AllocatedStorage:
+        Ref: DBAllocatedStorage
+      DBInstanceClass:
+        Ref: DBInstanceClass
+      StorageType:
+        Ref: DBStorageType
+      Engine:
+        Ref: DBEngine
+      EngineVersion:
+        Ref: DBEngineVersion
+      MasterUsername:
+        Ref: DBUser
+      MasterUserPassword:
+        Ref: DBPassword
+      Tags:
+        - Key: Name
+          Value: 'Demo RDS PostgreSQL Database'
+Outputs:
+  JdbcConnectionString:
+    Description: 'JDBC connection string for the RDS database'
+    Value: !Join ['', ['jdbc:postgresql://', !GetAtt 'ZeppelinDB.Endpoint.Address', ':', !GetAtt 'ZeppelinDB.Endpoint.Port', '/', !Ref DBName]]
+    Export:
+      Name: !Join [ ':', [ !Ref 'AWS::StackName', JdbcConnectionString ] ]

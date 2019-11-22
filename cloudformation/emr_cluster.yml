@@ -1,0 +1,119 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'This template deploys a single-Master-node EMR cluster.'
+Parameters:
+  ClustertName:
+    Type: String
+    Default: 'zeppelin-emr-demo-prod'
+  ZeppelinDemoBucket:
+    Type: String
+    Description: 'S3 bucket for Zeppelin EMR demo files'
+  Ec2KeyName:
+    Type: String
+  MasterInstanceType:
+    Type: String
+    Default: 'm5.xlarge'
+  CoreInstanceType:
+    Type: String
+    Default: 'm5.2xlarge'
+  LogBucket:
+    Type: String
+  ReleaseLabel:
+    Type: String
+    Default: 'emr-5.28.0'
+  TerminationProtected:
+    Type: String
+    Default: 'false'
+  EbsRootVolumeSize:
+    Type: String
+    Default: 10
+  GitHubAccount:
+    Type: String
+  GitHubRepository:
+    Type: String
+  GitHubToken:
+    Type: String
+Resources:
+  cluster:
+    Type: AWS::EMR::Cluster
+    Properties:
+      Applications:
+        - Name: Ganglia
+        - Name: Spark
+        - Name: Zeppelin
+      LogUri: !Join ['', ['s3n://', !Ref LogBucket, '/elasticmapreduce/']]
+      EbsRootVolumeSize: !Ref EbsRootVolumeSize
+      BootstrapActions:
+        - Name: 'Bootstrap Script'
+          ScriptBootstrapAction:
+            Args:
+              - !Ref GitHubAccount
+              - !Ref GitHubRepository
+            Path: !Join ['', ['s3n://', !Ref ZeppelinDemoBucket, '/bootstrap/', 'bootstrap.sh']]
+      Configurations:
+        - Classification: 'spark-defaults'
+          ConfigurationProperties:
+            spark.driver.extraClassPath: ':/usr/lib/hadoop-lzo/lib/*:/usr/lib/hadoop/hadoop-aws.jar:/usr/share/aws/aws-java-sdk/*:/usr/share/aws/emr/emrfs/conf:/usr/share/aws/emr/emrfs/lib/*:/usr/share/aws/emr/emrfs/auxlib/*:/usr/share/aws/emr/goodies/lib/emr-spark-goodies.jar:/usr/share/aws/emr/security/conf:/usr/share/aws/emr/security/lib/*:/usr/share/aws/hmclient/lib/aws-glue-datacatalog-spark-client.jar:/usr/share/java/Hive-JSON-Serde/hive-openx-serde.jar:/usr/share/aws/sagemaker-spark-sdk/lib/sagemaker-spark-sdk.jar:/usr/share/aws/emr/s3select/lib/emr-s3-select-spark-connector.jar:/home/hadoop/extrajars/*'
+            spark.executor.extraClassPath: ':/usr/lib/hadoop-lzo/lib/*:/usr/lib/hadoop/hadoop-aws.jar:/usr/share/aws/aws-java-sdk/*:/usr/share/aws/emr/emrfs/conf:/usr/share/aws/emr/emrfs/lib/*:/usr/share/aws/emr/emrfs/auxlib/*:/usr/share/aws/emr/goodies/lib/emr-spark-goodies.jar:/usr/share/aws/emr/security/conf:/usr/share/aws/emr/security/lib/*:/usr/share/aws/hmclient/lib/aws-glue-datacatalog-spark-client.jar:/usr/share/java/Hive-JSON-Serde/hive-openx-serde.jar:/usr/share/aws/sagemaker-spark-sdk/lib/sagemaker-spark-sdk.jar:/usr/share/aws/emr/s3select/lib/emr-s3-select-spark-connector.jar:/home/hadoop/extrajars/*'
+        - Classification: 'spark-env'
+          Configurations:
+            - Classification: 'export'
+              ConfigurationProperties:
+                PYSPARK_PYTHON: '/usr/bin/python3'
+                PYSPARK_DRIVER_PYTHON: '/usr/bin/python3'
+        - Classification: 'spark-hive-site'
+          ConfigurationProperties:
+            hive.metastore.client.factory.class: 'com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory'
+        - Classification: 'zeppelin-env'
+          Configurations:
+            - Classification: 'export'
+              ConfigurationProperties:
+                ZEPPELIN_NOTEBOOK_DIR: '/tmp/zeppelin-emr-demo'
+                ZEPPELIN_NOTEBOOK_STORAGE: 'org.apache.zeppelin.notebook.repo.GitHubNotebookRepo'
+                ZEPPELIN_NOTEBOOK_GIT_REMOTE_URL: !Join ['', ['git@github.com:', !Ref GitHubAccount, !Ref GitHubRepository, '.git']]
+                ZEPPELIN_NOTEBOOK_GIT_REMOTE_ACCESS_TOKEN: !Ref GitHubToken
+                CLASSPATH: ':/usr/lib/hadoop-lzo/lib/*:/usr/lib/hadoop/hadoop-aws.jar:/usr/share/java/Hive-JSON-Serde/hive-openx-serde.jar:/usr/share/aws/aws-java-sdk/*:/usr/share/aws/emr/emrfs/conf:/usr/share/aws/emr/emrfs/lib/*:/usr/share/aws/emr/emrfs/auxlib/*:/usr/share/aws/hmclient/lib/aws-glue-datacatalog-spark-client.jar:/usr/share/aws/sagemaker-spark-sdk/lib/sagemaker-spark-sdk.jar:/home/hadoop/extrajars/*'
+      ScaleDownBehavior: 'TERMINATE_AT_TASK_COMPLETION'
+      Instances:
+        Ec2KeyName: !Ref Ec2KeyName
+        MasterInstanceGroup:
+          InstanceCount: 1
+          InstanceType: !Ref MasterInstanceType
+          Market: 'ON_DEMAND'
+          Name: 'Master Instance Group'
+          EbsConfiguration:
+            # EbsBlockDeviceConfigs:
+            #   - VolumesPerInstance: 2
+                # VolumeSpecification:
+                #   SizeInGB: 32
+                #   VolumeType: 'gp2'
+        CoreInstanceGroup:
+          InstanceCount: 3
+          InstanceType: !Ref CoreInstanceType
+          Market: 'ON_DEMAND'
+          Name: 'Core Instance Group'
+          EbsConfiguration:
+            # EbsBlockDeviceConfigs:
+            #   - VolumesPerInstance: 2
+                # VolumeSpecification:
+                #   SizeInGB: 32
+                #   VolumeType: 'gp2'
+        TerminationProtected: !Ref TerminationProtected
+      Name: !Ref ClustertName
+      JobFlowRole: 'EMR_EC2_DefaultRole'
+      ServiceRole: 'EMR_DefaultRole'
+      ReleaseLabel: !Ref ReleaseLabel
+      VisibleToAllUsers: true
+      # Steps:
+      #   - ActionOnFailure: 'CANCEL_AND_WAIT'
+      #     HadoopJarStep:
+      #       Args:
+      #         - 'state-pusher-script'
+      #       Jar: 'command-runner.jar'
+      #     Name: 'Setup Hadoop Debugging'
+      Tags:
+        - Key: Project
+          Value: EMR Zeppelin Demo
+        - Key: Owner
+          Value: Gary Stafford
+        - Key: Environment
+          Value: Production

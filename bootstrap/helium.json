@@ -1,0 +1,23 @@
+{
+    "enabled": {
+        "ultimate-pie-chart": "ultimate-pie-chart@0.0.2",
+        "ultimate-column-chart": "ultimate-column-chart@0.0.2",
+        "ultimate-scatter-chart": "ultimate-scatter-chart@0.0.2",
+        "ultimate-range-chart": "ultimate-range-chart@0.0.2",
+        "ultimate-area-chart": "ultimate-area-chart@0.0.1",
+        "ultimate-line-chart": "ultimate-line-chart@0.0.1",
+        "zeppelin-bubblechart": "zeppelin-bubblechart@0.0.4",
+        "zeppelin-highcharts-scatterplot": "zeppelin-highcharts-scatterplot@0.0.2"
+    },
+    "packageConfig": {},
+    "bundleDisplayOrder": [
+        "ultimate-pie-chart",
+        "ultimate-column-chart",
+        "ultimate-scatter-chart",
+        "ultimate-range-chart",
+        "ultimate-area-chart",
+        "ultimate-line-chart",
+        "zeppelin-bubblechart",
+        "zeppelin-highcharts-scatterplot"
+    ]
+}

@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'This template deploys a Glue Database, (5) Crawlers, and Crawler IAM Role to AWS.'
+Parameters:
+  ZeppelinDemoBucket:
+    Type: String
+    Description: 'S3 bucket for Zeppelin EMR demo files'
+  GlueDatabase:
+    Type: String
+    Description: 'Glue database used for Zeppelin EMR demo'
+    Default: 'zeppelin_demo'
+Resources:
+  ZeppelinDemoGlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Ref GlueDatabase
+  ZeppelinDemoCrawlerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ZeppelinDemoCrawlerRole
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - glue.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: ZeppelinDemoCrawlerPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource: '*'
+  CrawlerBakeryCSV:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: bakery-csv-s3
+      Role: !GetAtt 'ZeppelinDemoCrawlerRole.Arn'
+      Targets:
+        S3Targets:
+          - Path: !Join ['', ['s3://', !Ref 'ZeppelinDemoBucket', '/data/bakery-csv']]
+      DatabaseName: !Ref ZeppelinDemoGlueDatabase
+    DependsOn:
+      - ZeppelinDemoCrawlerRole
+      - ZeppelinDemoGlueDatabase
+  CrawlerBakeryParquet:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: bakery-parquet-s3
+      Role: !GetAtt 'ZeppelinDemoCrawlerRole.Arn'
+      Targets:
+        S3Targets:
+          - Path: !Join ['', ['s3://', !Ref 'ZeppelinDemoBucket', '/data/bakery-parquet']]
+      DatabaseName: !Ref ZeppelinDemoGlueDatabase
+    DependsOn:
+      - ZeppelinDemoCrawlerRole
+      - ZeppelinDemoGlueDatabase
+  CrawlerBakerySummaryParquet:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: bakery-summary-parquet-s3
+      Role: !GetAtt 'ZeppelinDemoCrawlerRole.Arn'
+      Targets:
+        S3Targets:
+          - Path: !Join ['', ['s3://', !Ref 'ZeppelinDemoBucket', '/data/bakery-summary-parquet']]
+      DatabaseName: !Ref ZeppelinDemoGlueDatabase
+    DependsOn:
+      - ZeppelinDemoCrawlerRole
+      - ZeppelinDemoGlueDatabase
+  CrawlerRatingsParquet100K:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: ratings-parquet-s3-100k
+      Role: !GetAtt 'ZeppelinDemoCrawlerRole.Arn'
+      Targets:
+        S3Targets:
+          - Path: !Join ['', ['s3://', !Ref 'ZeppelinDemoBucket', '/data/ratings-parquet-100k']]
+      DatabaseName: !Ref ZeppelinDemoGlueDatabase
+    DependsOn:
+      - ZeppelinDemoCrawlerRole
+      - ZeppelinDemoGlueDatabase
+  CrawlerMoviesParquet100K:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: movies-parquet-s3-100k
+      Role: !GetAtt 'ZeppelinDemoCrawlerRole.Arn'
+      Targets:
+        S3Targets:
+          - Path: !Join ['', ['s3://', !Ref 'ZeppelinDemoBucket', '/data/movies-parquet-100k']]
+      DatabaseName: !Ref ZeppelinDemoGlueDatabase
+    DependsOn:
+      - ZeppelinDemoCrawlerRole
+      - ZeppelinDemoGlueDatabase
+  CrawlerRatingsParquet27MM:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: ratings-parquet-s3-27mm
+      Role: !GetAtt 'ZeppelinDemoCrawlerRole.Arn'
+      Targets:
+        S3Targets:
+          - Path: !Join ['', ['s3://', !Ref 'ZeppelinDemoBucket', '/data/ratings-parquet-27MM']]
+      DatabaseName: !Ref ZeppelinDemoGlueDatabase
+    DependsOn:
+      - ZeppelinDemoCrawlerRole
+      - ZeppelinDemoGlueDatabase
+  CrawlerMoviesParquet27MM:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: movies-parquet-s3-27mm
+      Role: !GetAtt 'ZeppelinDemoCrawlerRole.Arn'
+      Targets:
+        S3Targets:
+          - Path: !Join ['', ['s3://', !Ref 'ZeppelinDemoBucket', '/data/movies-parquet-27MM']]
+      DatabaseName: !Ref ZeppelinDemoGlueDatabase
+    DependsOn:
+      - ZeppelinDemoCrawlerRole
+      - ZeppelinDemoGlueDatabase
