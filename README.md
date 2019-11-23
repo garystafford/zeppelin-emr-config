@@ -1,6 +1,10 @@
 # Apache Zeppelin on Amazon EMR Demo
 
-Configuration files for post, [Getting Started with Apache Zeppelin on Amazon EMR, using AWS Glue, RDS, and S3: Part 1 - Setup](http://programmaticponderings.com/). To be used along with GitHub project, [zeppelin-emr-demo](https://github.com/garystafford/zeppelin-emr-demo).
+Configuration files for the accompanying post, [Getting Started with Apache Zeppelin on Amazon EMR, using AWS Glue, RDS, and S3](https://wp.me/p1RD28-6y6).
+
+![Demonstration Architecture](https://programmaticponderings.files.wordpress.com/2019/11/emr-zeppelin-6.png)
+
+## Files
 
 ```text
 .
