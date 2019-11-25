@@ -80,9 +80,9 @@ Resources:
           EbsConfiguration:
             EbsBlockDeviceConfigs:
               - VolumesPerInstance: 1
-                # VolumeSpecification:
-                #   SizeInGB: 32
-                #   VolumeType: 'gp2'
+                VolumeSpecification:
+                  SizeInGB: 32
+                  VolumeType: 'gp2'
         TerminationProtected: !Ref TerminationProtected
       Name: !Ref ClustertName
       JobFlowRole: 'EMR_EC2_DefaultRole'
