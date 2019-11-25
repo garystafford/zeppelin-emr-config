@@ -81,22 +81,22 @@ Resources:
           Market: 'ON_DEMAND'
           Name: 'Master Instance Group'
           EbsConfiguration:
-            # EbsBlockDeviceConfigs:
-            #   - VolumesPerInstance: 2
-                # VolumeSpecification:
-                #   SizeInGB: 32
-                #   VolumeType: 'gp2'
+            EbsBlockDeviceConfigs:
+              - VolumesPerInstance: 2
+                VolumeSpecification:
+                  SizeInGB: 32
+                  VolumeType: 'gp2'
         CoreInstanceGroup:
           InstanceCount: 3
           InstanceType: !Ref CoreInstanceType
           Market: 'ON_DEMAND'
           Name: 'Core Instance Group'
           EbsConfiguration:
-            # EbsBlockDeviceConfigs:
-            #   - VolumesPerInstance: 2
-                # VolumeSpecification:
-                #   SizeInGB: 32
-                #   VolumeType: 'gp2'
+            EbsBlockDeviceConfigs:
+              - VolumesPerInstance: 2
+                VolumeSpecification:
+                  SizeInGB: 32
+                  VolumeType: 'gp2'
         TerminationProtected: !Ref TerminationProtected
       Name: !Ref ClustertName
       JobFlowRole: 'EMR_EC2_DefaultRole'
